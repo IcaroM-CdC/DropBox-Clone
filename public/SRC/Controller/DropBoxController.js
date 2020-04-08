@@ -11,6 +11,7 @@ class DropBoxController {
 
         
         this.IniciarEventos();
+        this.ConectarFirebase();
 
     }
 
@@ -26,13 +27,67 @@ class DropBoxController {
         // INICIA A BARRA DE PROGRESSO APOS O ARQUIVO A SER ENVIADO FOR SELECIONADO
         this.JanelaEnviarArquivo_Elemento.addEventListener("change", event => {
 
+            // IMPEDE O BOTÃO DE ENVIAR ARQUIVOS SER CLICADO ENQUANTO UM ARQUIVO É ENVIADO
+            this.BotaoEnviarArquivo_Elemento.disabled = true
             console.log(event.target.files);
 
+            // INICIA O PROCESSO DE UPLOAD DO ARQUIVO
+            this.UploadArquivo(event.target.files).then(Respostas => {
+
+                Respostas.forEach( Resposta => {
+
+                    console.log(Resposta.Arquivos["input-files"])
+
+                    this.ReferenciaFirebase().push().set(Resposta.Arquivos["input-files"])
+
+                })
+
+                this.UploadCompleto()
+
+            }).catch(Erro => {
+
+                this.UploadCompleto()
+                console.error(Erro)
+
+            })
+
             this.MostrarBarraProgresso()
-            this.UploadArquivo(event.target.files);
-            this.JanelaEnviarArquivo_Elemento.value = "" // ZERA O VALOR DO ARQUIVO ENVIADO PARA OUTRO PODER SER ENVIADO
 
         })
+    }
+
+    UploadCompleto(){
+
+        this.MostrarBarraProgresso(false)
+        this.JanelaEnviarArquivo_Elemento.value = "" // ZERA O CAMPO DE CLIQUE
+        this.BotaoEnviarArquivo_Elemento.disabled = false
+
+    }
+
+    ReferenciaFirebase(){
+
+        return firebase.database().ref("arquivos")
+
+    }
+
+    ConectarFirebase(){
+
+        var firebaseConfig = {
+            apiKey: "AIzaSyC1y3GdgjmZ0OVfHUKk_4YMrNzmwzkBHCw",
+            authDomain: "dropbox-clone-870dd.firebaseapp.com",
+            databaseURL: "https://dropbox-clone-870dd.firebaseio.com",
+            projectId: "dropbox-clone-870dd",
+            storageBucket: "dropbox-clone-870dd.appspot.com",
+            messagingSenderId: "124367700415",
+            appId: "1:124367700415:web:71c378f0adf1107c84a10a",
+            measurementId: "G-T89LHYCPFB"
+
+        }
+        
+        // INICIA O FIREBASE
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
     }
 
     // METODO PARA MOSTAR E ESCONDER A BARRA DE PROGRESSO
@@ -64,7 +119,6 @@ class DropBoxController {
 
                 Ajax.onload = (Evento) => {
 
-                    this.MostrarBarraProgresso(false)
                     console.log("Arquivo enviado com sucesso") 
 
                     try {
@@ -80,7 +134,6 @@ class DropBoxController {
 
                 Ajax.onerror = (Evento) => {
 
-                    this.MostrarBarraProgresso(false)
                     Reject(Evento)
 
                 }
@@ -122,7 +175,7 @@ class DropBoxController {
         
         this.NomeArquivo_Elemento.innerHTML = Arquivo.name
         this.TempoRestante_Elemento.innerHTML = this.FormatarTempo(TempoRestante)
-        console.log(TempoGasto, TempoRestante, PorcentagemCarregado)
+        console.log(`Tgasto ${TempoGasto}, Trestante ${TempoRestante}, % ${PorcentagemCarregado}`)
 
     }
    
