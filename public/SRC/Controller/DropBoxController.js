@@ -5,6 +5,8 @@ class DropBoxController {
         this.BotaoEnviarArquivo_Elemento = document.querySelector("#btn-send-file")
         this.JanelaEnviarArquivo_Elemento = document.querySelector("#files")
         this.BarraProgEnviarArquivo_Elemento = document.querySelector("#react-snackbar-root")
+        this.ListaDeArquivos_Elemento = document.querySelector("#list-of-files-and-directories")
+
         this.BarraProgPorcentagemEnviarArquivo_Elemento = this.BarraProgEnviarArquivo_Elemento.querySelector(".mc-progress-bar-fg")
         this.NomeArquivo_Elemento = this.BarraProgEnviarArquivo_Elemento.querySelector(".filename")
         this.TempoRestante_Elemento = this.BarraProgEnviarArquivo_Elemento.querySelector(".timeleft")
@@ -12,6 +14,7 @@ class DropBoxController {
         
         this.IniciarEventos();
         this.ConectarFirebase();
+        this.LerArquivos();
 
     }
 
@@ -29,14 +32,14 @@ class DropBoxController {
 
             // IMPEDE O BOTÃO DE ENVIAR ARQUIVOS SER CLICADO ENQUANTO UM ARQUIVO É ENVIADO
             this.BotaoEnviarArquivo_Elemento.disabled = true
-            console.log(event.target.files);
+            //console.log(event.target.files);
 
             // INICIA O PROCESSO DE UPLOAD DO ARQUIVO
             this.UploadArquivo(event.target.files).then(Respostas => {
 
                 Respostas.forEach( Resposta => {
 
-                    console.log(Resposta.Arquivos["input-files"])
+                    //console.log(Resposta.Arquivos["input-files"])
 
                     this.ReferenciaFirebase().push().set(Resposta.Arquivos["input-files"])
 
@@ -61,6 +64,28 @@ class DropBoxController {
         this.MostrarBarraProgresso(false)
         this.JanelaEnviarArquivo_Elemento.value = "" // ZERA O CAMPO DE CLIQUE
         this.BotaoEnviarArquivo_Elemento.disabled = false
+
+    }
+
+    LerArquivos(){
+
+        this.ReferenciaFirebase().on("value", Snapshot => {
+
+            this.ListaDeArquivos_Elemento.innerHTML = ""
+
+            Snapshot.forEach(SnapshotItem => {
+
+                var key = SnapshotItem.key
+                var data = SnapshotItem.val()
+
+                //console.log(key, data)
+
+                // O METODO APPENDCHILD ADICIONA ELEMENTOS E NÃO HTML COMO TEXTO
+                this.ListaDeArquivos_Elemento.appendChild(this.TipoDeArquivo(data, key))
+
+            })
+
+        })
 
     }
 
@@ -175,7 +200,7 @@ class DropBoxController {
         
         this.NomeArquivo_Elemento.innerHTML = Arquivo.name
         this.TempoRestante_Elemento.innerHTML = this.FormatarTempo(TempoRestante)
-        console.log(`Tgasto ${TempoGasto}, Trestante ${TempoRestante}, % ${PorcentagemCarregado}`)
+        //console.log(`Tgasto ${TempoGasto}, Trestante ${TempoRestante}, % ${PorcentagemCarregado}`)
 
     }
    
@@ -383,17 +408,80 @@ class DropBoxController {
     }
     
     // METODO PARA TRATAR QUAL O TIPO DO ARQUIVO ENVIADO
-    TipoDeArquivo(Arquivo){
+    TipoDeArquivo(Arquivo, key){
 
-        return `
-        
-            <li>
-                ${this.TipoDeIconeArquivo(Arquivo)}
-                <div class="name text-center">${Arquivo.name}</div>
-            </li>
+        // CRIA UM ELEMENTO HTML DO TIPO LI
+        var li = document.createElement("li")
 
-        `;
+        li.dataset.key = key
+        li.innerHTML = `${this.TipoDeIconeArquivo(Arquivo)}
+                        <div class="name text-center">${Arquivo.name}</div>`
+
+        this.EventoLi(li)
+
+        return li;
 
     }
+
+    // METODO PARA TRATAR SA SELEÇÃO(CLIQUE) DE ELEMENTOS NA PÁGINA
+    EventoLi(li){
+
+        li.addEventListener("click", Evento => {
+
+            if (Evento.shiftKey) {
+
+                var PrimeiroLi = this.ListaDeArquivos_Elemento.querySelector("li.selected")
+
+                if (PrimeiroLi) {
+
+                    var IndexStart
+                    var IndexEnd
+
+                    li.parentElement.childNodes.forEach((Elemento, Index) => {
+
+                        if (PrimeiroLi === Elemento) IndexStart = Index
+                        if (li === Elemento) IndexEnd = Index
+
+                    })
+
+                    var Index = [IndexStart, IndexEnd].sort()
+
+                    li.parentElement.childNodes.forEach((Elemento, Index2) => {
+
+                        if (Index2 >= Index[0] && Index2 <= Index[1]){
+
+                            Elemento.classList.add("selected")
+
+                        }
+                    })
+                    
+                    return true;
+
+                }
+            }
+
+            // A CONDIÇÃO É ATENDIDA CASO O CLIQUE ACONTEÇA SEM O CONTROL SELECIONADO
+            if (!Evento.ctrlKey) {
+
+                // REMOVE O LI(SELEÇÃO) DE TODOS OS ELEMENTOS
+                this.ListaDeArquivos_Elemento.querySelectorAll("li.selected").forEach(Elemento => {
+
+                    Elemento.classList.remove("selected")
+
+                })
+            }
+
+            // ATIVA O LI(SELEÇÃO) DO ELEMENTO ALVO DO CLIQUE
+            li.classList.toggle("selected")
+            console.log("Teste")
+
+        })
+    }
+
 }
 
+/*
+if (this.ListaDeArquivos_Elemento.querySelector("li.selected") == true){
+    li.classList.remove("selected")
+}
+*/
