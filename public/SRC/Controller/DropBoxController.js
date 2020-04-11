@@ -2,10 +2,18 @@ class DropBoxController {
 
     constructor() {
 
+        // CRIANDO UM NOVO EVENTO 
+        this.onselectionchange = new Event("selectionchange")
+
         this.BotaoEnviarArquivo_Elemento = document.querySelector("#btn-send-file")
+        this.BotaoDeletarArquivo_Elemento = document.querySelector("#btn-delete")
+        this.BotaoNovaPasta_Elemento = document.querySelector("#btn-new-folder")
+        this.BotaoRenomear_Elemento = document.querySelector("#btn-rename")
+        
         this.JanelaEnviarArquivo_Elemento = document.querySelector("#files")
         this.BarraProgEnviarArquivo_Elemento = document.querySelector("#react-snackbar-root")
         this.ListaDeArquivos_Elemento = document.querySelector("#list-of-files-and-directories")
+
 
         this.BarraProgPorcentagemEnviarArquivo_Elemento = this.BarraProgEnviarArquivo_Elemento.querySelector(".mc-progress-bar-fg")
         this.NomeArquivo_Elemento = this.BarraProgEnviarArquivo_Elemento.querySelector(".filename")
@@ -19,6 +27,75 @@ class DropBoxController {
     }
 
     IniciarEventos() {
+
+        // EVENTO É DISPARADO SEMPRE QUE A SELEÇÃO DE ARQUIVO MUDAR
+        this.ListaDeArquivos_Elemento.addEventListener("selectionchange", event => {
+
+            //console.log("selectionchange", this.RetornarSelecao().length)
+
+            switch (this.RetornarSelecao().length) {
+                case 0:
+                
+                    this.BotaoDeletarArquivo_Elemento.style.display = "none"
+                    this.BotaoRenomear_Elemento.style.display = "none"
+
+                    break;
+
+                case 1:
+
+                    this.BotaoDeletarArquivo_Elemento.style.display = "block"
+                    this.BotaoRenomear_Elemento.style.display = "block"
+
+                    break;
+
+                default:
+                    
+                    this.BotaoDeletarArquivo_Elemento.style.display = "block"
+                    this.BotaoRenomear_Elemento.style.display = "none"
+
+                    break;
+            }
+
+        })
+
+        this.BotaoDeletarArquivo_Elemento.addEventListener("click", event => {
+
+            //console.log(event)
+
+            this.DeleteArquivo().then(Respostas => {
+
+                Respostas.forEach(Resposta => {
+
+                    //console.log(Resposta.Fields)
+
+                    if (Resposta.Fields.key) {
+
+                        this.ReferenciaFirebase().child(Resposta.Fields.key).remove()
+
+                        console.log("Arquivo deletado com sucesso do Firebase") 
+
+
+                    }
+                })
+            }).catch(Erro => {console.error(Erro)})
+        })
+
+        this.BotaoRenomear_Elemento.addEventListener("click", event => {
+
+            var li = this.RetornarSelecao()[0]
+            var Arquivo = JSON.parse(li.dataset.Arquivo) //O PARSE TRANSFORMA TEXTO EM JSON
+
+            var Nome = prompt("Renomear o arquivo", Arquivo.name)
+
+            if (Nome){
+
+                Arquivo.name = Nome
+
+                // VERIFICA SE NO FIREBASE TEM UMA CHAVE IGUAL A FORNECIDA NA HORA DE RENOMEAR
+                this.ReferenciaFirebase().child(li.dataset.key).set(Arquivo)
+
+            }
+        })
 
         // ABRE A JANELA DE ADICIONAR ARQUIVOS QUANDO O BOTÃO "ENVIAR ARQUIVOS" FOR CLICADO 
         this.BotaoEnviarArquivo_Elemento.addEventListener("click", event => {
@@ -37,7 +114,7 @@ class DropBoxController {
             // INICIA O PROCESSO DE UPLOAD DO ARQUIVO
             this.UploadArquivo(event.target.files).then(Respostas => {
 
-                Respostas.forEach( Resposta => {
+                Respostas.forEach(Resposta => {
 
                     //console.log(Resposta.Arquivos["input-files"])
 
@@ -126,6 +203,67 @@ class DropBoxController {
             this.BarraProgEnviarArquivo_Elemento.style.display = "none" //ESCONDE A BARRA
         }
 
+    }
+
+    DeleteArquivo() {
+
+        var Promises = []
+
+        this.RetornarSelecao().forEach(li => {
+
+            var Key = li.dataset.key
+            var Arquivo = JSON.parse(li.dataset.Arquivo)
+            
+            //console.log(Arquivo)
+
+            Promises.push(new Promise((Resolve, Reject) => {
+
+                var Ajax = new XMLHttpRequest()
+                Ajax.open("DELETE", "/arquivos")
+
+                Ajax.onload = (Evento) => {
+
+                    console.log("Arquivo deletado com sucesso do Disco Rigido") 
+
+                    try {
+                        Resolve(JSON.parse(Ajax.responseText))
+                    }
+                    catch (Erro){
+
+                        Reject(Erro)
+
+                    }
+
+                }
+
+                Ajax.onerror = (Evento) => {
+
+                    Reject(Evento)
+
+                }
+
+                Ajax.upload.onprogress = (Evento) => {
+
+                    //console.log(Evento)
+                    this.ProgressoDeUpload(Evento, Arquivo);
+
+                }
+
+                var formData = new FormData()
+
+                formData.append("path", Arquivo.path)
+                formData.append("key", Key)
+                
+                this.InicioTempoUpload = Date.now()
+
+                Ajax.send(formData)
+
+            }))
+
+            // RETORNA UMA PROMISE QUE RESOLVE QUANDO TODAS AS OUTRAS DO ARRAY FOREM RESOLVIDAS
+
+        })
+        return Promise.all(Promises)
     }
 
     // METODO PARA REALIZAR O UPLOAD DO ARQUIVO
@@ -414,12 +552,25 @@ class DropBoxController {
         var li = document.createElement("li")
 
         li.dataset.key = key
+        li.dataset.Arquivo = JSON.stringify(Arquivo) // STRINGFY PEGA UM OBJETO JSON E TRANSFORMA EM TEXTO
+
         li.innerHTML = `${this.TipoDeIconeArquivo(Arquivo)}
                         <div class="name text-center">${Arquivo.name}</div>`
 
         this.EventoLi(li)
+    
+        //console.log(Arquivo)
+        //console.log("EXIBINDO A PROPRIEDADE ARQUIVO")
+        //console.log(li.dataset.Arquivo)
 
         return li;
+
+    }
+
+    // RETORNA QUANTOS ELEMENTOS ESTÃO COM A PROPRIEDADE SELECIONADO VERDADEIRO
+    RetornarSelecao(){
+
+        return this.ListaDeArquivos_Elemento.querySelectorAll(".selected")
 
     }
 
@@ -428,6 +579,7 @@ class DropBoxController {
 
         li.addEventListener("click", Evento => {
 
+            // A CONDIÇÃO É ATENDIDA CASO O CLIQUE ACONTEÇA COM O SHIFT SELECIONADO
             if (Evento.shiftKey) {
 
                 var PrimeiroLi = this.ListaDeArquivos_Elemento.querySelector("li.selected")
@@ -455,6 +607,9 @@ class DropBoxController {
                         }
                     })
                     
+                    // EVENTO É DISPARADO SEMPRE QUE A SELEÇÃO DE ARQUIVO MUDAR
+                    this.ListaDeArquivos_Elemento.dispatchEvent(this.onselectionchange)
+
                     return true;
 
                 }
@@ -470,10 +625,11 @@ class DropBoxController {
 
                 })
             }
-
             // ATIVA O LI(SELEÇÃO) DO ELEMENTO ALVO DO CLIQUE
             li.classList.toggle("selected")
-            console.log("Teste")
+
+            // EVENTO É DISPARADO SEMPRE QUE A SELEÇÃO DE ARQUIVO MUDAR
+            this.ListaDeArquivos_Elemento.dispatchEvent(this.onselectionchange)
 
         })
     }
@@ -484,4 +640,5 @@ class DropBoxController {
 if (this.ListaDeArquivos_Elemento.querySelector("li.selected") == true){
     li.classList.remove("selected")
 }
+
 */
