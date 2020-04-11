@@ -2,6 +2,8 @@ class DropBoxController {
 
     constructor() {
 
+        this.PastaAtual = ["Principal"]
+
         // CRIANDO UM NOVO EVENTO 
         this.onselectionchange = new Event("selectionchange")
 
@@ -10,10 +12,10 @@ class DropBoxController {
         this.BotaoNovaPasta_Elemento = document.querySelector("#btn-new-folder")
         this.BotaoRenomear_Elemento = document.querySelector("#btn-rename")
         
+        this.BarraDeNavegacao_Elemento = document.querySelector("#browse-location")
         this.JanelaEnviarArquivo_Elemento = document.querySelector("#files")
         this.BarraProgEnviarArquivo_Elemento = document.querySelector("#react-snackbar-root")
         this.ListaDeArquivos_Elemento = document.querySelector("#list-of-files-and-directories")
-
 
         this.BarraProgPorcentagemEnviarArquivo_Elemento = this.BarraProgEnviarArquivo_Elemento.querySelector(".mc-progress-bar-fg")
         this.NomeArquivo_Elemento = this.BarraProgEnviarArquivo_Elemento.querySelector(".filename")
@@ -22,7 +24,8 @@ class DropBoxController {
         
         this.IniciarEventos();
         this.ConectarFirebase();
-        this.LerArquivos();
+        this.AbrirPasta();
+
 
     }
 
@@ -54,6 +57,24 @@ class DropBoxController {
                     this.BotaoRenomear_Elemento.style.display = "none"
 
                     break;
+            }
+
+        })
+
+        this.BotaoNovaPasta_Elemento.addEventListener("click", event => {
+
+            var Nome = prompt("Nome da nova pasta:")
+
+            if (Nome) {
+
+                this.ReferenciaFirebase().push().set({
+
+                    name: Nome,
+                    type: "folder",
+                    path: this.PastaAtual.join("/")
+
+                })
+
             }
 
         })
@@ -146,6 +167,8 @@ class DropBoxController {
 
     LerArquivos(){
 
+        this.UltimaPasta = this.PastaAtual.join("/")
+
         this.ReferenciaFirebase().on("value", Snapshot => {
 
             this.ListaDeArquivos_Elemento.innerHTML = ""
@@ -157,18 +180,28 @@ class DropBoxController {
 
                 //console.log(key, data)
 
-                // O METODO APPENDCHILD ADICIONA ELEMENTOS E NÃO HTML COMO TEXTO
-                this.ListaDeArquivos_Elemento.appendChild(this.TipoDeArquivo(data, key))
+                if (data.type){
 
+                    // O METODO APPENDCHILD ADICIONA ELEMENTOS E NÃO HTML COMO TEXTO
+                    this.ListaDeArquivos_Elemento.appendChild(this.TipoDeArquivo(data, key))
+
+
+                }
             })
 
         })
 
     }
 
-    ReferenciaFirebase(){
+    ReferenciaFirebase(Caminho){
 
-        return firebase.database().ref("arquivos")
+        if (!Caminho){
+
+            Caminho = this.PastaAtual.join("/")
+
+        }
+        
+        return firebase.database().ref(Caminho)
 
     }
 
@@ -577,6 +610,27 @@ class DropBoxController {
     // METODO PARA TRATAR SA SELEÇÃO(CLIQUE) DE ELEMENTOS NA PÁGINA
     EventoLi(li){
 
+        // EVENTO PARA TRATAR UM CLIQUE DUPLO SOBRE UM ARQUIVO OU PASTA
+        li.addEventListener("dblclick", Evento => {
+
+            var Arquivo = JSON.parse(li.dataset.Arquivo)
+
+            switch (Arquivo.type) {
+                
+                case "folder":
+
+                    this.PastaAtual.push(Arquivo.name)
+                    this.AbrirPasta()
+
+                    break;
+            
+                default:
+                    window.open("/file?path=" + file.path)
+                    break;
+            }
+
+        })
+
         li.addEventListener("click", Evento => {
 
             // A CONDIÇÃO É ATENDIDA CASO O CLIQUE ACONTEÇA COM O SHIFT SELECIONADO
@@ -632,6 +686,75 @@ class DropBoxController {
             this.ListaDeArquivos_Elemento.dispatchEvent(this.onselectionchange)
 
         })
+    }
+
+    AbrirPasta(){
+
+        if (this.UltimaPasta) {
+
+            this.ReferenciaFirebase(this.UltimaPasta).off("value")
+
+        }
+
+        this.LerArquivos()
+        this.AbrirBarraNav()
+
+    }
+
+    AbrirBarraNav(){
+
+        var BarraDeNavegacao = document.createElement("nav")
+        var Caminho = []
+
+        for (var Index = 0; Index < this.PastaAtual.length; Index++) {
+
+            var NomeDaPasta = this.PastaAtual[Index]
+            var Span = document.createElement("span")
+
+            Caminho.push(NomeDaPasta)
+
+            if (Index + 1 === this.PastaAtual.length) {
+
+                Span.innerHTML = NomeDaPasta
+
+            }
+
+            else {
+
+                Span.className = "breadcrumb-segment__wrapper"
+                Span.innerHTML = `
+                
+                <span class="ue-effect-container uee-BreadCrumbSegment-link-0">
+                    <a href="#" data-path="${Caminho.join("/")}" class="breadcrumb-segment">${NomeDaPasta}</a>
+                </span>
+                <svg width="24" height="24" viewBox="0 0 24 24" class="mc-icon-template-stateless" style="top: -1px; position: relative;">
+                    <title>arrow-right</title>
+                    <path d="M10.414 7.05l4.95 4.95-4.95 4.95L9 15.534 12.536 12 9 8.464z" fill="#637282" fill-rule="evenodd"></path>
+                </svg>
+                `
+
+            }
+
+            BarraDeNavegacao.appendChild(Span)
+
+
+        }
+
+        this.BarraDeNavegacao_Elemento.innerHTML = BarraDeNavegacao.innerHTML
+    
+        this.BarraDeNavegacao_Elemento.querySelectorAll("a").forEach(a => {
+
+            a.addEventListener("click", Event => {
+
+                Event.preventDefault()
+
+                this.PastaAtual = a.dataset.path.split("/")
+                this.AbrirPasta()
+
+            })
+
+        })
+
     }
 
 }
