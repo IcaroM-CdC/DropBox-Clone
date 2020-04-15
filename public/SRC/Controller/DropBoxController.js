@@ -178,11 +178,11 @@ class DropBoxController {
                 var key = SnapshotItem.key
                 var data = SnapshotItem.val()
 
-                //console.log(key, data)
+                console.log(data)
 
                 if (data.type){
 
-                    // O METODO APPENDCHILD ADICIONA ELEMENTOS E NÃO HTML COMO TEXTO
+                    // O METODO APPENDCHILD ADICIONA ELEMENTOS, E NÃO HTML COMO TEXTO
                     this.ListaDeArquivos_Elemento.appendChild(this.TipoDeArquivo(data, key))
 
 
@@ -292,10 +292,9 @@ class DropBoxController {
                 Ajax.send(formData)
 
             }))
-
-            // RETORNA UMA PROMISE QUE RESOLVE QUANDO TODAS AS OUTRAS DO ARRAY FOREM RESOLVIDAS
-
         })
+
+        // RETORNA UMA PROMISE QUE RESOLVE QUANDO TODAS AS OUTRAS DO ARRAY FOREM RESOLVIDAS
         return Promise.all(Promises)
     }
 
@@ -622,10 +621,15 @@ class DropBoxController {
                     this.PastaAtual.push(Arquivo.name)
                     this.AbrirPasta()
 
+                    this.BotaoDeletarArquivo_Elemento.style.display = "none"
+                    this.BotaoRenomear_Elemento.style.display = "none"
+
                     break;
             
                 default:
-                    window.open("/file?path=" + file.path)
+                    
+                    window.open("/arquivos?path=" + Arquivo.path)
+                        
                     break;
             }
 
@@ -751,6 +755,9 @@ class DropBoxController {
                 this.PastaAtual = a.dataset.path.split("/")
                 this.AbrirPasta()
 
+                this.BotaoDeletarArquivo_Elemento.style.display = "none"
+                this.BotaoRenomear_Elemento.style.display = "none"
+
             })
 
         })
@@ -758,10 +765,3 @@ class DropBoxController {
     }
 
 }
-
-/*
-if (this.ListaDeArquivos_Elemento.querySelector("li.selected") == true){
-    li.classList.remove("selected")
-}
-
-*/
