@@ -29,6 +29,7 @@ class DropBoxController {
 
     }
 
+
     IniciarEventos() {
 
         // EVENTO É DISPARADO SEMPRE QUE A SELEÇÃO DE ARQUIVO MUDAR
@@ -157,6 +158,7 @@ class DropBoxController {
         })
     }
 
+
     UploadCompleto(){
 
         this.MostrarBarraProgresso(false)
@@ -164,6 +166,7 @@ class DropBoxController {
         this.BotaoEnviarArquivo_Elemento.disabled = false
 
     }
+
 
     LerArquivos(){
 
@@ -193,6 +196,7 @@ class DropBoxController {
 
     }
 
+
     ReferenciaFirebase(Caminho){
 
         if (!Caminho){
@@ -204,6 +208,7 @@ class DropBoxController {
         return firebase.database().ref(Caminho)
 
     }
+
 
     ConectarFirebase(){
 
@@ -237,6 +242,7 @@ class DropBoxController {
         }
 
     }
+
 
     DeleteArquivo() {
 
@@ -692,6 +698,7 @@ class DropBoxController {
         })
     }
 
+
     AbrirPasta(){
 
         if (this.UltimaPasta) {
@@ -704,6 +711,7 @@ class DropBoxController {
         this.AbrirBarraNav()
 
     }
+
 
     AbrirBarraNav(){
 

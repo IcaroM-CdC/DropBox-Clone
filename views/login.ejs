@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DropBox Clone</title>
+
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link href="/public/assets/Bootstrap/bootstrap.min.js">
+    <link href="/public/assets/Bootstrap/bootstrap.min.css" rel="stylesheet">  
+    <link href="/public/assets/css/dropbox-clone-login.css" rel="stylesheet">
+    <link href="/public/assets/css/hover-min.css" rel="stylesheet">
+
+</head>
+<body id="Body">
+    
+    <div id="login" class="container login-container scene_element scene_element--fadeinup">
+        <div class="row">
+            <div class="col-md-6 login-form">
+                <div>
+                    <img id="dropbox-logo" src="/public/assets/images/DropFiles-Logo.png">
+                </div>
+                <form>
+                    <div class="form-group-login">
+                        <input type="text" class="form-control" placeholder="Seu E-mail" value="" />
+                    </div>
+                    <div class="form-group-login">
+                        <input type="password" class="form-control" placeholder="Sua senha" value="" />
+                    </div>
+                    <div class="button">
+                        <button id="btn-login" type="button" class="btnSubmit" >Login</button>
+                    </div>
+                    <div class="button">
+                        <button id="btn-changetoregister" type="button" class="btnRegister" >Registrar</button>
+                    </div>
+                    <br>
+                    <div class="form-group-login">
+                        <a href="#" class="ForgetPwd">Esqueceu sua senha?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="register" class="container login-container scene_element scene_element--fadeinup">
+        <div class="row">
+            <div class="col-md-6 register-form">
+                <form>
+                    <br>
+                    <br>
+                    <div class="form-group-register">
+                        <input id="Name" type="text" class="form-control" placeholder="Primeiro nome" value="" />
+                    </div>
+                    <div class="form-group-register">
+                        <input id="LastName" type="text" class="form-control" placeholder="Ultimo nome" value="" />
+                    </div>
+                    <div class="form-group-register">
+                        <input id="Nickname" type="text" class="form-control" placeholder="Nome de usuario" value="" />
+                    </div>
+                    <div class="form-group-register">
+                        <input id="Email" type="text" class="form-control" placeholder="Seu E-mail" value="" />
+                    </div>
+                    <div class="form-group-register">
+                        <input id="Password" type="password" class="form-control" placeholder="Sua senha" value="" />
+                    </div>
+                    <div class="form-group-register">
+                        <input id="ConfirmPassword" type="password" class="form-control" placeholder="Confirme sua senha" value="" />
+                    </div>
+                    <div class="button">
+                        <button id="btn-register" type="button" class="btnRegister" >Registrar</button>
+                    </div>
+                    <div class="button">
+                        <button id="btn-changetologin" type="button" class="btnSubmit" >Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+
+        const ChangeRegister_Button = document.querySelector("#btn-changetoregister")
+        const ChangeLogin_Button = document.querySelector("#btn-changetologin")
+
+        const Login_Button = document.querySelector("#login")
+        const Register_Button = document.querySelector("#register")
+
+        Register_Button.style.display = "none"
+
+        ChangeRegister_Button.addEventListener("click", Event => {
+
+            console.log("Clique")
+            Login_Button.style.display = "none"
+            Register_Button.style.display = "block"
+
+        })
+
+        ChangeLogin_Button.addEventListener("click", Event => {
+
+            Login_Button.style.display = "block"
+            Register_Button.style.display = "none"
+
+        })
+
+        Login_Button.addEventListener("click", Event => {
+
+            var Ajax = new XMLHttpRequest()
+            Ajax.open("POST", "/")
+
+        })
+    </script>
+
+</body>
+</html>

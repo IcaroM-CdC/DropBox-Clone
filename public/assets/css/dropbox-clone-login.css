@@ -1,0 +1,223 @@
+.login-container {
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+.login-form {
+    background-color: #ffffff;
+    padding: 5%;
+    box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.2), 0 9px 26px 0 rgba(0, 0, 0, 0.19);
+    height: 496px;
+    width: 570px;
+    position: absolute;
+    left: -10px;
+    top: -10px;
+
+}
+
+.register-form {
+    background-color: #ffffff;
+    padding: 5%;
+    box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.2), 0 9px 26px 0 rgba(0, 0, 0, 0.19);
+    height: 496px;
+    width: 570px;
+    position: absolute;
+    right: -10px;
+    top: -10px;
+}
+
+.login-form h3 {
+    text-align: center;
+    color: #333;
+}
+
+.login-container form {
+    padding: 10%;
+}
+
+.btnRegister {
+    width: 47%;
+    border-radius: 1rem;
+    padding: 1.5%;
+    border: none;
+    cursor: pointer;
+}
+
+.btnSubmit {
+    width: 47%;
+    border-radius: 1rem;
+    padding: 1.5%;
+    border: none;
+    cursor: pointer;
+}
+
+.login-form .btnRegister {
+    font-weight: 600;
+    color:  #1d2a37;
+    background-color: #fff;
+    position: relative;
+    left: -5px;
+    top: -50px;
+}
+
+.login-form .btnSubmit {
+    font-weight: 600;
+    color: #fff;
+    background-color: #ff6600;
+    position: relative;
+    left: 198px;
+    top: -85px;
+}
+
+.login-form .ForgetPwd {
+    color: #1d2a37;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.form-group-login {
+    position: relative;
+    top: -25px;
+    padding-bottom: 16px;
+}
+
+.form-group-register {
+    position: relative;
+    top: -80px;
+    padding-bottom: 16px;
+}
+
+.register-form h3 {
+    text-align: center;
+    color: #333;
+}
+
+.register-form .btnRegister {
+    font-weight: 600;
+    color: #fff;
+    background-color: #ff6600;
+    position: relative;
+    left: -5px;
+    top: -50px;
+}
+
+.register-form .btnSubmit {
+    font-weight: 600;
+    color:#1d2a37;
+    background-color: #fff;
+    position: relative;
+    left: 198px;
+    top: -85px;
+}
+
+#dropbox-logo {
+    width: 400px;
+    position: relative;
+    top: -20px;
+    left: 20px;
+}
+
+#cabecalho {
+    position: relative;
+    top: -40px;
+}
+
+#btn-changetologin {
+    position: relative;
+    top: -100px;
+    left: 193px;
+}
+
+#btn-changetoregister {
+    position: relative;
+    top: -45px;
+    left: 193px;
+}
+
+#btn-register {
+    position: relative;
+    top: -65px;
+    left: -6px;
+}
+
+#btn-login {
+    position: relative;
+    top: -10px;
+    left: -6px;
+}
+
+#Body {
+    background-image: url("/public/assets/images/BackGround.png");       
+}
+
+/* EFEITOS DE TRANSIÇÃO DAS PÁGINAS DE LOGIN E REGISTRO */
+
+
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+  
+    100% {
+        opacity: 1;
+    }
+}
+  
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 100%, 0);
+    }
+  
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+  
+@keyframes fadeInRight {
+    0% {
+        opacity: 0;
+        transform: translate3d(100%, 0, 0);
+    }
+  
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes fadeInLeft {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 100%);
+    }
+  
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+  
+.scene_element {
+    animation-duration: 0.25s;
+    transition-timing-function: ease-in;
+    animation-fill-mode: both;
+}
+
+.scene_element--fadein {
+    animation-name: fadeIn;
+}
+
+.scene_element--fadeinup {
+    animation-name: fadeInUp;
+}
+
+.scene_element--fadeinright {
+    animation-name: fadeInRight;
+}
+
+.scene_element--fadeinleft {
+    animation-name: fadeInLeft;
+}

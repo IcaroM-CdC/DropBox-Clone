@@ -10,6 +10,12 @@ Router.get('/', function(Requisicao, Resposta, Next) {
 
 })
 
+Router.get('/login', function(Requisicao, Resposta, Next) {
+
+    Resposta.render('login', { title: 'Express' });   
+
+})
+
 Router.post("/upload", function(Requisicao, Resposta, Next) {
 
     var Form = new Formidable.IncomingForm({
